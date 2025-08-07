@@ -3,11 +3,14 @@ import React from "react";
 import Address from "@/components/Address/Address";
 import AddressBook from "@/components/AddressBook/AddressBook";
 import Button from "@/components/Button/Button";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import InputText from "@/components/InputText/InputText";
 import Radio from "@/components/Radio/Radio";
 import Section from "@/components/Section/Section";
 import useAddressBook from "@/hooks/useAddressBook";
 import useFormFields from "@/hooks/useFormFields";
+
+import transformAddress from "./core/models/address";
 
 import styles from "./App.module.css";
 import { Address as AddressType } from "./types";
@@ -28,23 +31,40 @@ function App() {
    * Results states
    */
   const [error, setError] = React.useState<undefined | string>(undefined);
+  const [loading, setLoading] = React.useState(false);
   const [addresses, setAddresses] = React.useState<AddressType[]>([]);
   /**
    * Redux actions
    */
   const { addAddress } = useAddressBook();
 
-  /** TODO: Fetch addresses based on houseNumber and postCode using the local BE api
-   * - Example URL of API: ${process.env.NEXT_PUBLIC_URL}/api/getAddresses?postcode=1345&streetnumber=350
-   * - Ensure you provide a BASE URL for api endpoint for grading purposes!
-   * - Handle errors if they occur
-   * - Handle successful response by updating the `addresses` in the state using `setAddresses`
-   * - Make sure to add the houseNumber to each found address in the response using `transformAddress()` function
-   * - Ensure to clear previous search results on each click
-   * - Bonus: Add a loading state in the UI while fetching addresses
-   */
   const handleAddressSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+    setAddresses([]);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/getAddresses?postcode=${postCode}&streetnumber=${houseNumber}`
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.errormessage);
+      }
+      const addresses = data.details;
+      setAddresses(addresses.map(transformAddress));
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else if (typeof error === "string") {
+        setError(error);
+      } else {
+        setError("An unexpected error has occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   /** TODO: Add basic validation to ensure first name and last name fields aren't empty
@@ -105,19 +125,21 @@ function App() {
             <Button type="submit">Find</Button>
           </fieldset>
         </form>
-        {addresses.length > 0 &&
-          addresses.map((address) => {
-            return (
-              <Radio
-                name="selectedAddress"
-                id={address.id}
-                key={address.id}
-                onChange={onChange}
-              >
-                <Address {...address} />
-              </Radio>
-            );
-          })}
+        {loading
+          ? "Loading..."
+          : addresses.length > 0 &&
+            addresses.map((address) => {
+              return (
+                <Radio
+                  name="selectedAddress"
+                  id={address.id}
+                  key={address.id}
+                  onChange={onChange}
+                >
+                  <Address {...address} />
+                </Radio>
+              );
+            })}
         {/* TODO: Create generic <Form /> component to display form rows, legend and a submit button  */}
         {selectedAddress && (
           <form onSubmit={handlePersonSubmit}>
@@ -144,8 +166,7 @@ function App() {
           </form>
         )}
 
-        {/* TODO: Create an <ErrorMessage /> component for displaying an error message */}
-        {error && <div className="error">{error}</div>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         {/* TODO: Add a button to clear all form fields. 
         Button must look different from the default primary button, see design. 
