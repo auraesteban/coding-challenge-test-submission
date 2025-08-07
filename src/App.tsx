@@ -174,16 +174,9 @@ function App() {
         )}
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
-        <Button type="reset" onClick={handleClearFields}>
+        <Button type="reset" variant="secondary" onClick={handleClearFields}>
           Clear all fields
         </Button>
-
-        {/* TODO: Add a button to clear all form fields. 
-        Button must look different from the default primary button, see design. 
-        Button text name must be "Clear all fields"
-        On Click, it must clear all form fields, remove all search results and clear all prior
-        error messages
-        */}
       </Section>
 
       <Section variant="dark">
