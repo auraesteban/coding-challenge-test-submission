@@ -19,6 +19,7 @@ function App() {
   const {
     formFields: { postCode, houseNumber, firstName, lastName, selectedAddress },
     onChange,
+    reset,
   } = useFormFields({
     postCode: "",
     houseNumber: "",
@@ -90,6 +91,12 @@ function App() {
     }
 
     addAddress({ ...foundAddress, firstName, lastName });
+  };
+
+  const handleClearFields = () => {
+    setError("");
+    setAddresses([]);
+    reset();
   };
 
   return (
@@ -167,6 +174,9 @@ function App() {
         )}
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
+        <Button type="reset" onClick={handleClearFields}>
+          Clear all fields
+        </Button>
 
         {/* TODO: Add a button to clear all form fields. 
         Button must look different from the default primary button, see design. 

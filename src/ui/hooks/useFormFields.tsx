@@ -11,8 +11,13 @@ export default function useFormFields<T extends Fields>(fields: T) {
     });
   };
 
+  const reset = () => {
+    setFormFields(fields);
+  };
+
   return {
     formFields,
     onChange: handleChange,
+    reset,
   };
 }
