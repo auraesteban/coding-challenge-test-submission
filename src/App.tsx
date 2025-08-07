@@ -7,24 +7,23 @@ import InputText from "@/components/InputText/InputText";
 import Radio from "@/components/Radio/Radio";
 import Section from "@/components/Section/Section";
 import useAddressBook from "@/hooks/useAddressBook";
+import useFormFields from "@/hooks/useFormFields";
 
 import styles from "./App.module.css";
 import { Address as AddressType } from "./types";
 
 function App() {
-  /**
-   * Form fields states
-   * TODO: Write a custom hook to set form fields in a more generic way:
-   * - Hook must expose an onChange handler to be used by all <InputText /> and <Radio /> components
-   * - Hook must expose all text form field values, like so: { postCode: '', houseNumber: '', ...etc }
-   * - Remove all individual React.useState
-   * - Remove all individual onChange handlers, like handlePostCodeChange for example
-   */
-  const [postCode, setPostCode] = React.useState("");
-  const [houseNumber, setHouseNumber] = React.useState("");
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [selectedAddress, setSelectedAddress] = React.useState("");
+  const {
+    formFields: { postCode, houseNumber, firstName, lastName, selectedAddress },
+    onChange,
+  } = useFormFields({
+    postCode: "",
+    houseNumber: "",
+    firstName: "",
+    lastName: "",
+    selectedAddress: "",
+  });
+
   /**
    * Results states
    */
@@ -34,25 +33,6 @@ function App() {
    * Redux actions
    */
   const { addAddress } = useAddressBook();
-
-  /**
-   * Text fields onChange handlers
-   */
-  const handlePostCodeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setPostCode(e.target.value);
-
-  const handleHouseNumberChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setHouseNumber(e.target.value);
-
-  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setFirstName(e.target.value);
-
-  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setLastName(e.target.value);
-
-  const handleSelectedAddressChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => setSelectedAddress(e.target.value);
 
   /** TODO: Fetch addresses based on houseNumber and postCode using the local BE api
    * - Example URL of API: ${process.env.NEXT_PUBLIC_URL}/api/getAddresses?postcode=1345&streetnumber=350
@@ -109,7 +89,7 @@ function App() {
             <div className={styles.formRow}>
               <InputText
                 name="postCode"
-                onChange={handlePostCodeChange}
+                onChange={onChange}
                 placeholder="Post Code"
                 value={postCode}
               />
@@ -117,7 +97,7 @@ function App() {
             <div className={styles.formRow}>
               <InputText
                 name="houseNumber"
-                onChange={handleHouseNumberChange}
+                onChange={onChange}
                 value={houseNumber}
                 placeholder="House number"
               />
@@ -132,7 +112,7 @@ function App() {
                 name="selectedAddress"
                 id={address.id}
                 key={address.id}
-                onChange={handleSelectedAddressChange}
+                onChange={onChange}
               >
                 <Address {...address} />
               </Radio>
@@ -147,7 +127,7 @@ function App() {
                 <InputText
                   name="firstName"
                   placeholder="First name"
-                  onChange={handleFirstNameChange}
+                  onChange={onChange}
                   value={firstName}
                 />
               </div>
@@ -155,7 +135,7 @@ function App() {
                 <InputText
                   name="lastName"
                   placeholder="Last name"
-                  onChange={handleLastNameChange}
+                  onChange={onChange}
                   value={lastName}
                 />
               </div>
