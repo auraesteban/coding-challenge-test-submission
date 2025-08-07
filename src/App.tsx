@@ -39,11 +39,16 @@ function App() {
    */
   const { addAddress } = useAddressBook();
 
+  const resetForm = () => {
+    reset();
+    setError("");
+    setAddresses([]);
+  };
+
   const handleAddressSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setAddresses([]);
+    resetForm();
 
     try {
       const response = await fetch(
@@ -94,12 +99,11 @@ function App() {
     }
 
     addAddress({ ...foundAddress, firstName, lastName });
+    resetForm();
   };
 
   const handleClearFields = () => {
-    setError("");
-    setAddresses([]);
-    reset();
+    resetForm();
   };
 
   return (
